@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherWise</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="https://openweathermap.org/img/wn/01d@2x.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body data-theme="dark" class="weather-default">
+    <div class="weather-container">
+        <div class="header">
+            <h1 class="app-title">WeatherWise</h1>
+            <div class="header-controls">
+                <div class="search-box">
+                    <input type="text" id="city-input" placeholder="Enter city name..." autocomplete="off">
+                    <button id="search-btn">Search</button>
+                </div>
+                <div class="theme-unit-toggles">
+                    <button id="current-location-btn" class="control-btn"><i class="fas fa-map-marker-alt"></i></button>
+                    <button id="theme-toggle" class="control-btn theme-toggle"> <i class="fas fa-sun"></i></button>
+                    <button id="unit-toggle" class="control-btn unit-toggle">°F</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="location-info">
+            <h2 id="location-name">Fetching Location...</h2>
+            <p id="date"></p>
+            <p class="last-updated" id="last-updated"></p>
+        </div>
+
+        <div class="main-weather">
+            <div class="weather-icon-container">
+                <img id="weather-icon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather Icon">
+                <div class="weather-desc">Sunny</div>
+            </div>
+            <div class="temperature-container">
+                <span id="temperature">--</span><span class="unit">°C</span>
+            </div>
+        </div>
+
+        <div class="details-grid">
+            <div class="detail-item">
+                <span class="label">Feels like:</span>
+                <span id="feels-like" class="value">--°C</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Humidity:</span>
+                <span id="humidity" class="value">--%</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Wind:</span>
+                <span id="wind-speed" class="value">-- km/h</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Pressure:</span>
+                <span id="pressure" class="value">-- hPa</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Visibility:</span>
+                <span class="value" id="visibility">-- km</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">UV Index:</span>
+                <span class="value" id="uv-index">--</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Sunrise:</span>
+                <span class="value" id="sunrise">--:--</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Sunset:</span>
+                <span class="value" id="sunset">--:--</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Air Quality:</span>
+                <span class="value" id="air-quality">N/A</span>
+            </div>
+        </div>
+
+        <div class="forecast-section">
+            <h3>Hourly Forecast</h3>
+            <div class="hourly-forecast-grid" id="hourly-forecast">
+                <div class="hourly-item skeleton"></div>
+                <div class="hourly-item skeleton"></div>
+                <div class="hourly-item skeleton"></div>
+                <div class="hourly-item skeleton"></div>
+                <div class="hourly-item skeleton"></div>
+            </div>
+        </div>
+
+        <div class="forecast-section">
+            <h3>Daily Forecast</h3>
+            <div class="daily-forecast-grid" id="daily-forecast">
+                <div class="daily-item skeleton"></div>
+                <div class="daily-item skeleton"></div>
+                <div class="daily-item skeleton"></div>
+                <div class="daily-item skeleton"></div>
+                <div class="daily-item skeleton"></div>
+            </div>
+        </div>
+
+        <div class="error-message" id="error-message">
+            <p>Location not found or API error. Please try again.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

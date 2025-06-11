@@ -1,0 +1,745 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+/* --- Theme Variables --- */
+:root { /* Default (Dark Theme) */
+    --primary-bg: #1e1e2f;
+    --secondary-bg: #2a2a3e;
+    --text-color: #e0e0e0;
+    --accent-color: #88c0d0;
+    --card-color: #36364a;
+    --error-color: #e06c75;
+    --toggle-bg: #4a4a5e;
+    --toggle-text: #e0e0e0;
+    --input-bg: var(--card-color);
+    --input-text: var(--text-color);
+    --placeholder-color: #a0a0a0;
+    --scrollbar-thumb: var(--accent-color);
+    --scrollbar-track: #4a4a5e;
+
+    /* Weather specific colors for backgrounds (Dark theme) */
+    --sunny-gradient: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    --cloudy-gradient: linear-gradient(135deg, #7F8C8D 0%, #34495E 100%);
+    --rainy-gradient: linear-gradient(135deg, #5D6D7E 0%, #2C3E50 100%);
+    --snowy-gradient: linear-gradient(135deg, #BDC3C7 0%, #5D6D7E 100%);
+    --stormy-gradient: linear-gradient(135deg, #34495E 0%, #1a252f 100%);
+    --misty-gradient: linear-gradient(135deg, #AAB7B8 0%, #7F8C8D 100%);
+}
+
+[data-theme="light"] {
+    --primary-bg: #f0f2f5;
+    --secondary-bg: #ffffff;
+    --text-color: #333333;
+    --accent-color: #4a90e2; /* A blue accent for light theme */
+    --card-color: #f7f7f7;
+    --error-color: #d9534f;
+    --toggle-bg: #e0e0e0;
+    --toggle-text: #333333;
+    --input-bg: #e9e9e9;
+    --input-text: #333333;
+    --placeholder-color: #666666;
+    --scrollbar-thumb: var(--accent-color);
+    --scrollbar-track: #e0e0e0;
+
+    /* Weather specific colors for backgrounds (Light theme) */
+    --sunny-gradient: linear-gradient(135deg, #ADD8E6 0%, #87CEEB 100%); /* Light blue sky */
+    --cloudy-gradient: linear-gradient(135deg, #E0E0E0 0%, #B0B0B0 100%); /* Grayish white */
+    --rainy-gradient: linear-gradient(135deg, #C0D9D9 0%, #A0BFC0 100%); /* Blue-gray */
+    --snowy-gradient: linear-gradient(135deg, #F0FFFF 0%, #E0F0F0 100%); /* White-ish blue */
+    --stormy-gradient: linear-gradient(135deg, #B0B0B0 0%, #808080 100%); /* Darker gray */
+    --misty-gradient: linear-gradient(135deg, #E0E0E0 0%, #D0D0D0 100%);
+}
+
+/* --- Base Styling --- */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 0;
+
+    /* Theme Transition */
+    transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+/* --- Dynamic Weather Backgrounds --- */
+body::before, body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+/* Base styles for the main container and content elements */
+.weather-container {
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, #1a1a2a 100%); /* Default dark gradient */
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    padding: 40px;
+    width: 90%;
+    max-width: 700px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 1s ease-out;
+    z-index: 1;
+
+    /* Theme Transition for container background and shadow */
+    transition: background 0.6s ease, box-shadow 0.6s ease;
+}
+
+/* Specific background gradients for weather conditions applied via JS */
+body.weather-clear .weather-container { background: var(--sunny-gradient); }
+body.weather-clouds .weather-container { background: var(--cloudy-gradient); }
+body.weather-rain .weather-container, body.weather-drizzle .weather-container { background: var(--rainy-gradient); }
+body.weather-snow .weather-container { background: var(--snowy-gradient); }
+body.weather-thunderstorm .weather-container { background: var(--stormy-gradient); }
+body.weather-mist .weather-container, body.weather-fog .weather-container, body.weather-haze .weather-container, body.weather-smoke .weather-container, body.weather-dust .weather-container, body.weather-sand .weather-container, body.weather-ash .weather-container, body.weather-squall .weather-container, body.weather-tornado .weather-container { background: var(--misty-gradient); }
+
+
+/* Hide weather animations for light theme to prevent clashes */
+[data-theme="light"] body::before,
+[data-theme="light"] body::after {
+    opacity: 0 !important; /* Force hide animated backgrounds */
+}
+
+/* Apply light theme container background */
+[data-theme="light"] .weather-container {
+    background: var(--secondary-bg); /* Use solid color or lighter gradient */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+}
+
+
+/* All existing weather animations */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* DEFAULT / CLEAR */
+body.weather-clear { background: var(--sunny-gradient); }
+body.weather-clear::before {
+    opacity: 1;
+    background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    animation: pulseSun 15s infinite alternate;
+}
+@keyframes pulseSun {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+
+/* CLOUDY */
+body.weather-clouds { background: var(--cloudy-gradient); }
+body.weather-clouds::before {
+    opacity: 1;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="15" fill="rgba(255,255,255,0.08)"/><circle cx="80" cy="50" r="20" fill="rgba(255,255,255,0.06)"/><circle cx="50" cy="80" r="12" fill="rgba(255,255,255,0.04)"/></svg>') repeat;
+    background-size: 150px 100px;
+    animation: cloudMove 40s linear infinite;
+}
+@keyframes cloudMove {
+    from { background-position: 0 0; }
+    to { background-position: 100% 0; }
+}
+
+/* RAIN */
+body.weather-rain, body.weather-drizzle { background: var(--rainy-gradient); }
+body.weather-rain::before, body.weather-drizzle::before {
+    opacity: 1;
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(ellipse at 20% 20%, rgba(255,255,255,0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 60%, rgba(255,255,255,0.05) 0%, transparent 50%);
+    animation: gentlePulse 20s infinite alternate;
+}
+body.weather-rain::after, body.weather-drizzle::after {
+    opacity: 1;
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(30deg);
+    background:
+        linear-gradient(transparent, rgba(255, 255, 255, 0.2), transparent),
+        repeating-linear-gradient(transparent, rgba(255, 255, 255, 0.2), transparent);
+    box-shadow:
+        10px 10px 0 0 rgba(255, 255, 255, 0.1),
+        30px 50px 0 0 rgba(255, 255, 255, 0.15),
+        50px 20px 0 0 rgba(255, 255, 255, 0.12),
+        70px 80px 0 0 rgba(255, 255, 255, 0.09),
+        90px 40px 0 0 rgba(255, 255, 255, 0.13),
+        110px 10px 0 0 rgba(255, 255, 255, 0.1),
+        130px 50px 0 0 rgba(255, 255, 255, 0.15),
+        150px 20px 0 0 rgba(255, 255, 255, 0.12),
+        170px 80px 0 0 rgba(255, 255, 255, 0.09),
+        190px 40px 0 0 rgba(255, 255, 255, 0.13),
+        210px 10px 0 0 rgba(255, 255, 255, 0.1),
+        230px 50px 0 0 rgba(255, 255, 255, 0.15),
+        250px 20px 0 0 rgba(255, 255, 255, 0.12),
+        270px 80px 0 0 rgba(255, 255, 255, 0.09),
+        290px 40px 0 0 rgba(255, 255, 255, 0.13),
+        310px 10px 0 0 rgba(255, 255, 255, 0.1),
+        330px 50px 0 0 rgba(255, 255, 255, 0.15),
+        350px 20px 0 0 rgba(255, 255, 255, 0.12),
+        370px 80px 0 0 rgba(255, 255, 255, 0.09),
+        390px 40px 0 0 rgba(255, 255, 255, 0.13);
+    animation: rainFall 2s linear infinite;
+}
+@keyframes rainFall {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+
+/* SNOW */
+body.weather-snow { background: var(--snowy-gradient); }
+body.weather-snow::before {
+    opacity: 1;
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    animation: snowFall 20s linear infinite;
+    background:
+        radial-gradient(circle, rgba(255,255,255,0.8) 2px, transparent 2px),
+        radial-gradient(circle, rgba(255,255,255,0.8) 2px, transparent 2px),
+        radial-gradient(circle, rgba(255,255,255,0.8) 2px, transparent 2px);
+    background-size: 50px 50px;
+    box-shadow:
+        50px 100px 0 0 rgba(255,255,255,0.7),
+        150px 200px 0 0 rgba(255,255,255,0.6),
+        250px 300px 0 0 rgba(255,255,255,0.8),
+        350px 50px 0 0 rgba(255,255,255,0.7),
+        450px 250px 0 0 rgba(255,255,255,0.6),
+        50px 500px 0 0 rgba(255,255,255,0.7),
+        150px 600px 0 0 rgba(255,255,255,0.6),
+        250px 700px 0 0 rgba(255,255,255,0.8),
+        350px 450px 0 0 rgba(255,255,255,0.7),
+        450px 650px 0 0 rgba(255,255,255,0.6);
+}
+@keyframes snowFall {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+
+/* THUNDERSTORM */
+body.weather-thunderstorm { background: var(--stormy-gradient); }
+body.weather-thunderstorm::before {
+    opacity: 1;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 0, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 0, 0.05) 0%, transparent 30%);
+    animation: lightningFlicker 3s infinite steps(1);
+}
+@keyframes lightningFlicker {
+    0%, 20%, 40%, 60%, 80%, 100% { opacity: 0; }
+    10%, 30%, 50%, 70%, 90% { opacity: 0.15; }
+}
+
+
+/* MIST/FOG/HAZE */
+body.weather-mist, body.weather-fog, body.weather-haze, body.weather-smoke, body.weather-dust, body.weather-sand, body.weather-ash, body.weather-squall, body.weather-tornado { background: var(--misty-gradient); }
+body.weather-mist::before, body.weather-fog::before, body.weather-haze::before, body.weather-smoke::before, body.weather-dust::before, body.weather-sand::before, body.weather-ash::before, body.weather-squall::before, body.weather-tornado::before {
+    opacity: 1;
+    background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 30% 70%, rgba(255,255,255,0.03) 0%, transparent 50%);
+    animation: mistFlow 25s infinite alternate;
+}
+@keyframes mistFlow {
+    0% { transform: scale(1) translateX(0); opacity: 0.8; }
+    50% { transform: scale(1.1) translateX(10px); opacity: 0.9; }
+    100% { transform: scale(1) translateX(0); opacity: 0.8; }
+}
+
+
+/* --- General Layout & Styling --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.header-controls { /* NEW: Flex container for search and toggles */
+    display: flex;
+    flex-direction: column; /* Stack search and toggles on small screens */
+    gap: 15px;
+    flex-grow: 1; /* Allow it to grow */
+    align-items: flex-end; /* Align to the right on large screens */
+}
+
+.app-title {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: var(--accent-color);
+    text-shadow: 0 0 10px rgba(136, 192, 208, 0.5);
+    flex-shrink: 0; /* Don't shrink title */
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    width: 100%; /* Take full width of its parent */
+}
+
+#city-input {
+    padding: 12px 15px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--input-bg); /* Use theme variable */
+    color: var(--input-text); /* Use theme variable */
+    font-size: 1em;
+    outline: none;
+    flex-grow: 1;
+    transition: all 0.3s ease; /* Transition for theme change */
+}
+
+#city-input::placeholder {
+    color: var(--placeholder-color); /* Use theme variable */
+}
+
+#city-input:focus {
+    box-shadow: 0 0 0 2px var(--accent-color);
+    background-color: color-mix(in srgb, var(--input-bg) 80%, var(--accent-color) 20%); /* Dynamic hover color */
+}
+
+/* --- Common Button Styles (New control-btn class) --- */
+.control-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, color 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+.control-btn:hover {
+    transform: translateY(-1px);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Specific Button Styles --- */
+#search-btn {
+    background-color: var(--accent-color);
+    color: var(--primary-bg); /* Text color contrasts with accent */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); 
+}
+
+#search-btn:hover {
+    background-color: color-mix(in srgb, var(--accent-color) 80%, black 20%); /* Darker accent */
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+#search-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.theme-unit-toggles { /* Group for toggles */
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.unit-toggle, .theme-toggle {
+    background-color: var(--toggle-bg);
+    color: var(--toggle-text);
+}
+
+.unit-toggle:hover, .theme-toggle:hover {
+    background-color: color-mix(in srgb, var(--toggle-bg) 80%, white 20%); /* Lighter hover */
+}
+
+.theme-toggle i {
+    transition: transform 0.3s ease-out; /* Icon rotation */
+}
+.theme-toggle.dark-mode-icon i {
+    transform: rotate(180deg); /* Rotate moon icon slightly */
+}
+
+.current-location-btn {
+    background-color: var(--accent-color); /* Use accent color to make it stand out */
+    color: var(--primary-bg); /* Text color contrasts with accent */
+    display: flex; /* Allow icon and text to be side by side */
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Space between icon and text */
+}
+
+.current-location-btn:hover {
+    background-color: color-mix(in srgb, var(--accent-color) 80%, black 20%);
+}
+
+
+.location-info {
+    position: relative;
+    z-index: 2;
+    text-align: left;
+    transition: color 0.6s ease;
+}
+
+#location-name {
+    font-size: 2em;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--accent-color);
+}
+
+#date, .last-updated {
+    font-size: 0.9em;
+    color: var(--text-color); /* Updated to use theme color */
+}
+
+.last-updated {
+    margin-top: 5px;
+}
+
+.main-weather {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.weather-icon-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: iconBounce 2s infinite ease-in-out;
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+
+#weather-icon {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+    transition: filter 0.6s ease; /* Transition for icon filter */
+}
+[data-theme="light"] #weather-icon {
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.2)); /* Lighter shadow for light theme */
+}
+
+.weather-desc {
+    font-size: 1.3em;
+    font-weight: 400;
+    color: var(--text-color); /* Updated to use theme color */
+    text-transform: capitalize;
+    transition: color 0.6s ease;
+}
+
+.temperature-container {
+    font-size: 4.5em;
+    font-weight: 700;
+    color: var(--text-color); /* Updated to use theme color */
+    display: flex;
+    align-items: flex-start;
+    line-height: 1;
+    transition: color 0.6s ease;
+}
+
+.temperature-container .unit {
+    font-size: 0.5em;
+    margin-top: 10px;
+    color: var(--accent-color);
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 30px;
+    position: relative;
+    z-index: 2;
+}
+
+.detail-item {
+    background-color: var(--card-color); /* Updated to use theme color */
+    padding: 18px 25px;
+    border-radius: 12px;
+    text-align: left;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.6s ease, color 0.6s ease; /* Added theme transitions */
+}
+
+.detail-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+}
+
+.detail-item .label {
+    font-size: 0.9em;
+    color: var(--placeholder-color); /* Updated to use theme color */
+    margin-bottom: 5px;
+    display: block;
+    transition: color 0.6s ease;
+}
+
+.detail-item .value {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: var(--text-color); /* Updated to use theme color */
+    transition: color 0.6s ease;
+}
+
+.forecast-section {
+    margin-top: 40px;
+    position: relative;
+    z-index: 2;
+}
+
+.forecast-section h3 {
+    font-size: 1.8em;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--accent-color);
+    text-align: left;
+}
+
+.hourly-forecast-grid, .daily-forecast-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding-bottom: 15px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+.hourly-forecast-grid::-webkit-scrollbar, .daily-forecast-grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.hourly-forecast-grid::-webkit-scrollbar-track, .daily-forecast-grid::-webkit-scrollbar-track {
+    background: var(--scrollbar-track); /* Updated to use theme color */
+    border-radius: 10px;
+    transition: background 0.6s ease;
+}
+
+.hourly-forecast-grid::-webkit-scrollbar-thumb, .daily-forecast-grid::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb); /* Updated to use theme color */
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.hourly-forecast-grid::-webkit-scrollbar-thumb:hover, .daily-forecast-grid::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--scrollbar-thumb) 80%, black 20%); /* Darker hover */
+}
+
+.hourly-item, .daily-item {
+    flex: 0 0 auto;
+    background-color: var(--card-color); /* Updated to use theme color */
+    padding: 15px 10px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    scroll-snap-align: start;
+    transition: transform 0.3s ease, background-color 0.6s ease, color 0.6s ease, box-shadow 0.6s ease; /* Added theme transitions */
+}
+
+.hourly-item {
+    width: 100px;
+}
+.daily-item {
+    width: 120px;
+}
+
+.hourly-item:hover, .daily-item:hover {
+    transform: scale(1.05);
+}
+
+.hourly-item .time, .daily-item .day {
+    font-size: 1em;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-color); /* Updated to use theme color */
+    transition: color 0.6s ease;
+}
+
+.hourly-item img, .daily-item img {
+    width: 50px;
+    height: 50px;
+    margin: 5px 0;
+}
+
+.hourly-item .temp, .daily-item .temp-range {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.hourly-item .chance-of-rain, .daily-item .desc {
+    font-size: 0.8em;
+    color: var(--placeholder-color); /* Updated to use theme color */
+    margin-top: 5px;
+    transition: color 0.6s ease;
+}
+
+/* Skeleton loader */
+.skeleton {
+    background-color: color-mix(in srgb, var(--card-color) 80%, black 20%); /* Adapt to theme */
+    background: linear-gradient(90deg, color-mix(in srgb, var(--card-color) 80%, black 20%) 25%, color-mix(in srgb, var(--card-color) 70%, black 30%) 50%, color-mix(in srgb, var(--card-color) 80%, black 20%) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite linear;
+    border-radius: 12px;
+    height: 120px;
+    transition: background-color 0.6s ease; /* Transition for skeleton */
+}
+
+@keyframes loading {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.error-message {
+    background-color: var(--error-color);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    display: none;
+    animation: slideInFromTop 0.5s ease-out;
+    position: relative;
+    z-index: 2;
+    transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* Media query adjustments for responsiveness */
+@media (max-width: 768px) {
+
+    .weather-container {
+        padding: 25px;
+        width: 95%;
+        margin: 20px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .app-title {
+        text-align: center;
+        font-size: 2em;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .header-controls {
+        flex-direction: column;
+        align-items: center; /* Center search and toggles */
+    }
+
+    .search-box {
+        width: 100%;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #city-input, #search-btn {
+        width: 100%;
+    }
+
+    .theme-unit-toggles {
+        margin-top: 15px;
+        width: 100%;
+        justify-content: center; /* Center toggles */
+    }
+
+    .main-weather {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .temperature-container {
+        font-size: 3.5em;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hourly-forecast-grid, .daily-forecast-grid {
+        justify-content: flex-start;
+    }
+
+    .hourly-item {
+        width: 90px;
+    }
+    .daily-item {
+        width: 100px;
+    }
+
+    .theme-unit-toggles {
+        flex-direction: column; /* Stack toggles on small screens */
+        align-items: stretch; /* Stretch buttons to full width */
+        margin-top: 15px;
+    }
+
+    .unit-toggle, .theme-toggle, .current-location-btn { /* Apply to all three buttons */
+        width: 100%; /* Make them full width */
+        padding: 12px 15px; /* Adjust padding for better touch targets */
+    }
+}
